@@ -1,26 +1,17 @@
 # PyFundJP
-日本国内の投資信託に関する情報取得ツール.
+日本国内の投資信託に関する情報取得スクリプト.
+
+## 動作環境
+Python 3.5
+lxml 3.5.0
+pandas 0.17.1
 
 ## 機能
-###PyFundJP.detail()
-属性情報を取得する
+### PyFundJP.attrib()
+属性情報を取得する.
 
-###PyFundJP.nav()
-基準価格を取得する
+### PyFundJP.nav(date_from, date_to)
+基準価格を取得する.
 
-## サンプル
-
-```py:PyFundJP_Test.py
-#! /usr/bin/env python
-# -*- coding: utf-8 -*-
-# python 3.5
-from PyFundJP import PyFundJP
-
-myFund = PyFundJP('JP90C000A931')
-
-# 属性情報を取得する
-print(myFund.detail())
-
-# 基準価格を取得する
-print(myFund.nav(2015,1,1,2015,12,31))
-```
+### PyFundJP.perf(date_from, date_to, amount_money)
+分配金込損益率を取得する.

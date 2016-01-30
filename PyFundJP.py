@@ -1,19 +1,21 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 # python 3.5
-
 import urllib.request
 import pandas as pd
 import datetime
 import lxml.html
+from decimal import *
 
 
-class PyFundJP():
+class PyFundJP:
     def __init__(self, isin):
         self.isin = isin
 
+        getcontext().prec = 15
+
     # 属性を取得する
-    def detail(self):
+    def attrib(self):
         # URL生成
         args = dict(isinCd=self.isin)
         url = 'http://tskl.toushin.or.jp/FdsWeb/view/FDST030000.seam?isinCd={isinCd}'.format(**args)
@@ -29,60 +31,61 @@ class PyFundJP():
         labels_mid = root.xpath(xpath_mid)
         labels_bottom = root.xpath(xpath_bottom)
 
-        f = lambda t: t.text.replace('\n','')
+        f = lambda t: t.text.replace('\n', '')
         labels_top = list(map(f, labels_top))
         labels_mid = list(map(f, labels_mid))
         labels_bottom = list(map(f, labels_bottom))
 
         # 空dictに値をセット
-        d = dict()
+        attrib = dict()
 
-        d['isin_cd'] = self.isin
-        d['closing_date'] = labels_top[0]
-        d['index_type'] = labels_top[1]
-        d['trustee_fee'] = labels_top[2]
-        d['unit_type'] = labels_top[3]
-        d['establishment_date'] = labels_top[4]
-        d['fund_ctg1'] = labels_top[5]
-        d['fund_ctg2'] = labels_top[6]
-        d['fund_name'] = labels_top[7]
-        d['fund_shortname'] = labels_top[8]
-        d['asset_manager'] = labels_top[9]
+        attrib['isin_cd'] = self.isin
+        attrib['closing_date'] = labels_top[0]
+        attrib['index_type'] = labels_top[1]
+        attrib['trustee_fee'] = labels_top[2]
+        attrib['unit_type'] = labels_top[3]
+        attrib['establishment_date'] = labels_top[4]
+        attrib['fund_ctg1'] = labels_top[5]
+        attrib['fund_ctg2'] = labels_top[6]
+        attrib['fund_name'] = labels_top[7]
+        attrib['fund_shortname'] = labels_top[8]
+        attrib['asset_manager'] = labels_top[9]
 
-        d['independent_division'] = labels_mid[0]
-        d['investment_asset'] = labels_mid[1]
-        d['investment_style'] = labels_mid[2]
-        d['establishment_date2'] = labels_mid[3]
-        d['close_date'] = labels_mid[4]
+        attrib['independent_division'] = labels_mid[0]
+        attrib['investment_asset'] = labels_mid[1]
+        attrib['investment_style'] = labels_mid[2]
+        attrib['establishment_date2'] = labels_mid[3]
+        attrib['close_date'] = labels_mid[4]
 
-        d['trustee_fee_am'] = labels_bottom[0]
+        attrib['trustee_fee_am'] = labels_bottom[0]
         # 無報酬の場合は'buying_fee'が取れず要素数が5になる
         if len(labels_bottom) == 5:
-            d['buying_fee'] = 0
-            d['partical_redemption_charge'] = labels_bottom[1]
-            d['trustee_fee2'] = labels_bottom[2]
-            d['trustee_fee_seller'] = labels_bottom[3]
-            d['trustee_fee_custody'] = labels_bottom[4]
+            attrib['buying_fee'] = 0
+            attrib['partical_redemption_charge'] = labels_bottom[1]
+            attrib['trustee_fee2'] = labels_bottom[2]
+            attrib['trustee_fee_seller'] = labels_bottom[3]
+            attrib['trustee_fee_custody'] = labels_bottom[4]
         else:
-            d['buying_fee'] = labels_bottom[1]
-            d['partical_redemption_charge'] = labels_bottom[2]
-            d['trustee_fee2'] = labels_bottom[3]
-            d['trustee_fee_seller'] = labels_bottom[4]
-            d['trustee_fee_custody'] = labels_bottom[5]
+            attrib['buying_fee'] = labels_bottom[1]
+            attrib['partical_redemption_charge'] = labels_bottom[2]
+            attrib['trustee_fee2'] = labels_bottom[3]
+            attrib['trustee_fee_seller'] = labels_bottom[4]
+            attrib['trustee_fee_custody'] = labels_bottom[5]
 
-        return d
+        return attrib
 
     # 基準価格を取得する
-    def nav(self, sy, sm, sd, ey, em ,ed):
-        # 取得開始日,取得終了日,設定日を取得
+    def nav(self, date_from, date_to):
+        # 期間開始日, 期間終了日を設定
         d = dict()
-        d['from'] = datetime.date(sy, sm, sd)
-        d['to'] = datetime.date(ey, em, ed)
+        d['from'] = datetime.datetime.strptime(date_from, '%Y-%m-%d').date()
+        d['to'] = datetime.datetime.strptime(date_to, '%Y-%m-%d').date()
 
-        detail = self.detail()
-        d['est'] = datetime.datetime.strptime(detail['establishment_date'], '%Y/%m/%d').date()
+        # 設定日を設定
+        attrib = self.attrib()
+        d['est'] = datetime.datetime.strptime(attrib['establishment_date'], '%Y/%m/%d').date()
 
-        # 初期期間
+        # 期間開始日と設定日の大きい方を取得開始日とする
         d['start'] = max([d['from'], d['est']])
         d['end'] = d['start'] + datetime.timedelta(days=90)
 
@@ -90,34 +93,74 @@ class PyFundJP():
 
         loop_flg = True
         while loop_flg:
-            # 取得期間の終端が終期を超える場合は終端に合わせる
+            # 取得終了日が期間終了日を超える場合は期間終了日を取得終了日とする
             if d['end'] >= d['to']:
                 d['end'] = d['to']
                 loop_flg = False
 
-            # 取得処理
+            # URL生成
             k = ['sy', 'sm', 'sd', 'ey', 'em', 'ed']
             v = [d['start'].year, d['start'].month, d['start'].day, d['end'].year, d['end'].month, d['end'].day]
-            v = list(map(lambda s:str(s).zfill(2), v))
-
+            v = list(map(lambda s: str(s).zfill(2), v))
             args = dict(zip(k, v))
             args['isinCd'] = self.isin
 
-            # URL生成
             url = 'http://tskl.toushin.or.jp/FdsWeb/view/FDST030004.seam?isinCd={isinCd}\
 &stdDateFromY={sy}&stdDateFromM={sm}&stdDateFromD={sd}\
 &stdDateToY={ey}&stdDateToM={em}&stdDateToD={ed}&showFlg=csv&adminFlag=2'.format(**args)
             response = urllib.request.urlopen(url)
 
+            # データを取得しDataFrameに追加
             try:
                 df = pd.read_csv(response, encoding='Shift_JIS', index_col=0)
-            except:
+            except ValueError:
                 df = pd.DataFrame({})
 
             df_res = df_res.append(df)
 
-            # 取得開始日を取得終了日の翌日にする
+            # 取得終了日の翌日を次の取得開始日にする
             d['start'] = d['end'] + datetime.timedelta(days=1)
             d['end'] = d['start'] + datetime.timedelta(days=90)
 
         return df_res
+
+    # 騰落率を取得する
+    def perf(self, date_from, date_to, amount_money):
+        # 期間開始日, 期間終了日を設定
+        d = dict()
+        d['from'] = datetime.datetime.strptime(date_from, '%Y-%m-%d').date()
+        d['to'] = datetime.datetime.strptime(date_to, '%Y-%m-%d').date()
+
+        k = ['sy', 'sm', 'sd', 'ey', 'em', 'ed']
+        v = [d['from'].year, d['from'].month, d['from'].day, d['to'].year, d['to'].month, d['to'].day]
+        v = list(map(lambda s: str(s).zfill(2), v))
+        args = dict(zip(k, v))
+        args['isinCd'] = self.isin
+        args['buyAmntMoney'] = amount_money
+
+        # URL作成
+        url = 'http://tskl.toushin.or.jp/FdsWeb/view/FDST030002.seam?isinCd={isinCd}&initFlag=1&\
+stdDateFromY={sy}&stdDateFromM={sm}&stdDateFromD={sd}&\
+stdDateToY={ey}&stdDateToM={em}&stdDateToD={ed}&buyAmntMoney={buyAmntMoney}'.format(**args)
+
+        html = urllib.request.urlopen(url).read()
+        root = lxml.html.fromstring(html)
+
+        xpath = '//div[@id="showList"]/table[2]/tr[2]//td'
+        contents = root.xpath(xpath)
+
+
+
+        # 所有期間損益, 分配金累計, 所有期間損益（分配金含む）, 収益率(年換算)
+        f = lambda elem: Decimal(elem.text_content().replace(',', '').replace('円', ''))
+
+        try:
+            k = ['pl', 'dividend_total', 'pl_include_dividend', 'return']
+            v = list(map(f, [contents[0], contents[1], contents[2]]))
+            v.append(Decimal(contents[3].text_content().replace('\n', '').replace('%', '')) / 100)
+            perf = dict(zip(k, v))
+
+        except IndexError:
+            perf = dict()
+
+        return perf
