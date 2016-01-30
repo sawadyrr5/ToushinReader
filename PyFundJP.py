@@ -40,31 +40,31 @@ class PyFundJP:
         attrib = dict()
 
         attrib['isin_cd'] = self.isin
-        attrib['closing_date'] = labels_top[0]
-        attrib['index_type'] = labels_top[1]
-        attrib['trustee_fee'] = labels_top[2]
-        attrib['unit_type'] = labels_top[3]
-        attrib['establishment_date'] = labels_top[4]
-        attrib['fund_ctg1'] = labels_top[5]
-        attrib['fund_ctg2'] = labels_top[6]
-        attrib['fund_name'] = labels_top[7]
-        attrib['fund_shortname'] = labels_top[8]
-        attrib['asset_manager'] = labels_top[9]
+        attrib['closing_date'] = labels_top[0]          # 決算日
+        attrib['index_type'] = labels_top[1]            # インデックス型
+        attrib['trustee_fee'] = labels_top[2]           # 信託報酬
+        attrib['unit_type'] = labels_top[3]             # 単位型、追加型
+        attrib['establishment_date'] = labels_top[4]    # 設定日
+        attrib['fund_ctg1'] = labels_top[5]             # カテゴリ1
+        attrib['fund_ctg2'] = labels_top[6]             # カテゴリ2
+        attrib['fund_name'] = labels_top[7]             # ファンド名
+        attrib['fund_shortname'] = labels_top[8]        # ファンド略名
+        attrib['asset_manager'] = labels_top[9]         # 委託会社
 
-        attrib['independent_division'] = labels_mid[0]
-        attrib['investment_asset'] = labels_mid[1]
-        attrib['investment_style'] = labels_mid[2]
-        attrib['establishment_date2'] = labels_mid[3]
-        attrib['close_date'] = labels_mid[4]
+        attrib['independent_division'] = labels_mid[0]  # 独立区分
+        attrib['investment_asset'] = labels_mid[1]      # 投資対象資産
+        attrib['investment_style'] = labels_mid[2]      # 資産属性
+        attrib['establishment_date2'] = labels_mid[3]   # 設定日2
+        attrib['close_date'] = labels_mid[4]            # 償還日
 
-        attrib['trustee_fee_am'] = labels_bottom[0]
+        attrib['trustee_fee_am'] = labels_bottom[0]     # 信託報酬(委託)
         # 無報酬の場合は'buying_fee'が取れず要素数が5になる
         if len(labels_bottom) == 5:
-            attrib['buying_fee'] = 0
-            attrib['partical_redemption_charge'] = labels_bottom[1]
-            attrib['trustee_fee2'] = labels_bottom[2]
-            attrib['trustee_fee_seller'] = labels_bottom[3]
-            attrib['trustee_fee_custody'] = labels_bottom[4]
+            attrib['buying_fee'] = 0                    # 購入手数料
+            attrib['partical_redemption_charge'] = labels_bottom[1]     # 信託財産留保金
+            attrib['trustee_fee2'] = labels_bottom[2]                   # 信託報酬その2
+            attrib['trustee_fee_seller'] = labels_bottom[3]             # 信託報酬(販売)
+            attrib['trustee_fee_custody'] = labels_bottom[4]            # 信託報酬(受託)
         else:
             attrib['buying_fee'] = labels_bottom[1]
             attrib['partical_redemption_charge'] = labels_bottom[2]
@@ -131,6 +131,7 @@ class PyFundJP:
         d['from'] = datetime.datetime.strptime(date_from, '%Y-%m-%d').date()
         d['to'] = datetime.datetime.strptime(date_to, '%Y-%m-%d').date()
 
+        # URL生成
         k = ['sy', 'sm', 'sd', 'ey', 'em', 'ed']
         v = [d['from'].year, d['from'].month, d['from'].day, d['to'].year, d['to'].month, d['to'].day]
         v = list(map(lambda s: str(s).zfill(2), v))
@@ -138,7 +139,6 @@ class PyFundJP:
         args['isinCd'] = self.isin
         args['buyAmntMoney'] = amount_money
 
-        # URL作成
         url = 'http://tskl.toushin.or.jp/FdsWeb/view/FDST030002.seam?isinCd={isinCd}&initFlag=1&\
 stdDateFromY={sy}&stdDateFromM={sm}&stdDateFromD={sd}&\
 stdDateToY={ey}&stdDateToM={em}&stdDateToD={ed}&buyAmntMoney={buyAmntMoney}'.format(**args)
@@ -148,8 +148,6 @@ stdDateToY={ey}&stdDateToM={em}&stdDateToD={ed}&buyAmntMoney={buyAmntMoney}'.for
 
         xpath = '//div[@id="showList"]/table[2]/tr[2]//td'
         contents = root.xpath(xpath)
-
-
 
         # 所有期間損益, 分配金累計, 所有期間損益（分配金含む）, 収益率(年換算)
         f = lambda elem: Decimal(elem.text_content().replace(',', '').replace('円', ''))
