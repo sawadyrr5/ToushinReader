@@ -5,7 +5,7 @@
 ###PyFundJP.detail()
 属性情報を取得する
 
-###PyFundJP.detail()
+###PyFundJP.nav()
 基準価格を取得する
 
 ## サンプル
