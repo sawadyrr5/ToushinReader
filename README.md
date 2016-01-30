@@ -23,4 +23,4 @@ print(myFund.detail())
 
 # 基準価格を取得する
 print(myFund.nav(2015,1,1,2015,12,31))
-'''
+```
