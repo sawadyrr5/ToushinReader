@@ -9,9 +9,11 @@ from decimal import *
 
 
 class PyFundJP:
+    """
+    Pythonで日本国内の投資信託関連情報を取得するクラス
+    """
     def __init__(self, isin):
         self.isin = isin
-
         getcontext().prec = 15
 
     # 属性を取得する
@@ -36,9 +38,7 @@ class PyFundJP:
         labels_mid = list(map(f, labels_mid))
         labels_bottom = list(map(f, labels_bottom))
 
-        # 空dictに値をセット
         attrib = dict()
-
         attrib['isin_cd'] = self.isin
         attrib['closing_date'] = labels_top[0]          # 決算日
         attrib['index_type'] = labels_top[1]            # インデックス型
@@ -87,12 +87,13 @@ class PyFundJP:
 
         # 期間開始日と設定日の大きい方を取得開始日とする
         d['start'] = max([d['from'], d['est']])
-        d['end'] = d['start'] + datetime.timedelta(days=90)
 
         df_res = pd.DataFrame({})
 
         loop_flg = True
         while loop_flg:
+            # 期間終了日は期間開始日の90日後とする
+            d['end'] = d['start'] + datetime.timedelta(days=90)
             # 取得終了日が期間終了日を超える場合は期間終了日を取得終了日とする
             if d['end'] >= d['to']:
                 d['end'] = d['to']
@@ -112,7 +113,7 @@ class PyFundJP:
 
             # データを取得しDataFrameに追加
             try:
-                df = pd.read_csv(response, encoding='Shift_JIS', index_col=0)
+                df = pd.read_csv(response, encoding='Shift_JIS')
             except ValueError:
                 df = pd.DataFrame({})
 
@@ -120,7 +121,6 @@ class PyFundJP:
 
             # 取得終了日の翌日を次の取得開始日にする
             d['start'] = d['end'] + datetime.timedelta(days=1)
-            d['end'] = d['start'] + datetime.timedelta(days=90)
 
         return df_res
 
@@ -150,14 +150,12 @@ stdDateToY={ey}&stdDateToM={em}&stdDateToD={ed}&buyAmntMoney={buyAmntMoney}'.for
         contents = root.xpath(xpath)
 
         # 所有期間損益, 分配金累計, 所有期間損益（分配金含む）, 収益率(年換算)
-        f = lambda elem: Decimal(elem.text_content().replace(',', '').replace('円', ''))
-
         try:
+            f = lambda elem: Decimal(elem.text_content().replace(',', '').replace('円', ''))
             k = ['pl', 'dividend_total', 'pl_include_dividend', 'return']
             v = list(map(f, [contents[0], contents[1], contents[2]]))
             v.append(Decimal(contents[3].text_content().replace('\n', '').replace('%', '')) / 100)
             perf = dict(zip(k, v))
-
         except IndexError:
             perf = dict()
 
