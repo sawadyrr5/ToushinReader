@@ -15,9 +15,9 @@ pandas 0.17.1
 ### PyFundJP.attrib()
 属性情報を取得する.
 
-### PyFundJP.nav(date_from, date_to)
+### PyFundJP.nav()
 基準価格を取得する.
 返り値はpandas.DataFrame形式です.
 
-### PyFundJP.perf(date_from, date_to, amount_money)
+### PyFundJP.perf(amount_money)
 分配金込損益率を取得する.

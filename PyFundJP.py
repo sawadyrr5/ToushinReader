@@ -18,8 +18,11 @@ class PyFundJP:
         self.end = end
         decimal.getcontext().prec = 15
 
-    # 属性を取得する
     def attrib(self):
+        """
+        Get fund attribute
+        :return:
+        """
         args = dict(isinCd=self.isin)
         url = 'http://tskl.toushin.or.jp/FdsWeb/view/FDST030000.seam?isinCd={isinCd}'.format(**args)
 
@@ -71,6 +74,18 @@ class PyFundJP:
 
     # 基準価格を取得する
     def nav(self):
+        """
+        :return:
+        pandas.DataFrame
+
+        Index
+            Date
+        Columns
+            NAV
+            Capital
+            Dividend
+            Closing
+        """
         date_est = datetime.strptime(self.attrib()['establishment_date'], '%Y/%m/%d')
         date_from = max([self.start, date_est])
 
@@ -109,8 +124,18 @@ class PyFundJP:
 
         return df_res
 
-    # 騰落率を取得する
     def perf(self, amount_money):
+        """
+        騰落率を取得する
+
+        :param amount_money:
+        :return:
+
+        pl                      所有期間損益
+        dividend_total          分配金累計
+        pl_include_dividend     所有期間損益（分配金含む）
+        return                  収益率(年換算)
+        """
         k = ['sy', 'sm', 'sd', 'ey', 'em', 'ed']
         v = [self.start.year, self.start.month, self.start.day, self.end.year, self.end.month, self.end.day]
         v = [str(s).zfill(2) for s in v]
@@ -147,13 +172,6 @@ if __name__ == '__main__':
     end = datetime(2015, 12, 31)
 
     myFund = PyFundJP(ISIN, start, end)
-    print(myFund.attrib())                          # 属性情報を取得する
-    print(myFund.nav())                             # 基準価格を取得する
-
-    """
-    pl                  所有期間損益
-    dividend_total      分配金累計
-    pl_include_dividend 所有期間損益（分配金含む）
-    return              収益率(年換算)
-    """
+    print(myFund.attrib())
+    print(myFund.nav())
     print(myFund.perf(1000000))
