@@ -58,7 +58,7 @@ class AttributePage:
         # csvリンク
         if res["LINK_HISTORICAL_DATA"]:
             res["LINK_HISTORICAL_DATA"] = (
-                "https://toushin-lib.fwg.ne.jp" + res["LINK_HISTORICAL_DATA"]
+                    "https://toushin-lib.fwg.ne.jp" + res["LINK_HISTORICAL_DATA"]
             )
 
         return res
@@ -68,10 +68,119 @@ class AttributePage:
         if text:
             res = (
                 text.replace("評価基準日\xa0\xa0", "")
-                .replace("愛称：", "")
-                .replace("運用会社名：", "")
-                .replace("\n", "")
-                .strip()
+                    .replace("愛称：", "")
+                    .replace("運用会社名：", "")
+                    .replace("\n", "")
+                    .strip()
             )
 
             return res
+
+    def distribution(self) -> list:
+        """
+        最大直近12ヶ月の分配金を取得する
+        :return:
+        """
+        distributions = []
+
+        for i in range(12):
+            distribution_date_locator = AttributeLocator().get_distribution_date_locator(i)
+            distribution_amount_locator = AttributeLocator().get_distribution_amount_locator(i)
+
+            distribution_date = self._parse_element(distribution_date_locator, None)
+            distribution_amount = self._parse_element(distribution_amount_locator, None)
+
+            # 決算日と分配金が取得できたら返り値に入れる
+            if distribution_date and distribution_amount:
+                distributions.append(
+                    (
+                        self._sanitize(distribution_date),
+                        self._sanitize(distribution_amount)
+                    )
+                )
+
+        return distributions
+
+    def torakuritsu(self) -> list:
+        """
+        騰落率を取得する
+        :return:
+        """
+        torakuritsu = []
+
+        for i in range(12):
+            torakuritsu_period_locator = AttributeLocator().get_torakuritsu_period_locator(i)
+            torakuritsu_fund_locator = AttributeLocator().get_torakuritsu_fund_locator(i)
+            torakuritsu_category_locator = AttributeLocator().get_torakuritsu_category_locator(i)
+
+            torakuritsu_period = self._parse_element(torakuritsu_period_locator, None)
+            torakuritsu_fund = self._parse_element(torakuritsu_fund_locator, None)
+            torakuritsu_category = self._parse_element(torakuritsu_category_locator, None)
+
+            # 決算日と分配金が取得できたら返り値に入れる
+            if torakuritsu_period and torakuritsu_fund and torakuritsu_category:
+                torakuritsu.append(
+                    (
+                        self._sanitize(torakuritsu_period),
+                        self._sanitize(torakuritsu_fund),
+                        self._sanitize(torakuritsu_category)
+                    )
+                )
+
+        return torakuritsu
+
+    def risk(self) -> list:
+        """
+        騰落率を取得する
+        :return:
+        """
+        risk = []
+
+        for i in range(12):
+            risk_period_locator = AttributeLocator().get_risk_period_locator(i)
+            risk_fund_locator = AttributeLocator().get_risk_fund_locator(i)
+            risk_category_locator = AttributeLocator().get_risk_category_locator(i)
+
+            risk_period = self._parse_element(risk_period_locator, None)
+            risk_fund = self._parse_element(risk_fund_locator, None)
+            risk_category = self._parse_element(risk_category_locator, None)
+
+            # 決算日と分配金が取得できたら返り値に入れる
+            if risk_period and risk_fund and risk_category:
+                risk.append(
+                    (
+                        self._sanitize(risk_period),
+                        self._sanitize(risk_fund),
+                        self._sanitize(risk_category)
+                    )
+                )
+
+        return risk
+
+    def sr(self) -> list:
+        """
+        騰落率を取得する
+        :return:
+        """
+        sr = []
+
+        for i in range(12):
+            sr_period_locator = AttributeLocator().get_sr_period_locator(i)
+            sr_fund_locator = AttributeLocator().get_sr_fund_locator(i)
+            sr_category_locator = AttributeLocator().get_sr_category_locator(i)
+
+            sr_period = self._parse_element(sr_period_locator, None)
+            sr_fund = self._parse_element(sr_fund_locator, None)
+            sr_category = self._parse_element(sr_category_locator, None)
+
+            # 決算日と分配金が取得できたら返り値に入れる
+            if sr_period and sr_fund and sr_category:
+                sr.append(
+                    (
+                        self._sanitize(sr_period),
+                        self._sanitize(sr_fund),
+                        self._sanitize(sr_category)
+                    )
+                )
+
+        return sr
