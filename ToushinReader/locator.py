@@ -16,7 +16,7 @@ class AttributeLocator:
         None,
     )
     # 運用会社名
-    FUND_INVESTMENT_MANAGER = (
+    INVESTMENT_MANAGER = (
         "body > div.fds-image-top-message.mb-4 > div > div > div:nth-child(1) > div.col-md-9 > div:nth-child(3)",
         None,
     )
@@ -51,13 +51,13 @@ class AttributeLocator:
         None,
     )
     # 商品分類
-    PRODUCT_CATEGORY = (
+    CATEGORY = (
         "body > div.fds-image-top-message.mb-4 > div > div > div.row.no-gutters.font-weight-bold > div.col-6.col-md-3.pl-md-5 > div.fds-font-size-0",
         None,
     )
     # インデックス型
     INDEX_TYPE = ("#tab_content1 > div > table > tr:nth-child(1) > td", None)
-    # 設定尾
+    # 設定日
     ESTABLISH_DATE = (
         "#tab_content1 > div > table > tr:nth-child(2) > td",
         None,
@@ -115,65 +115,97 @@ class AttributeLocator:
         None,
     )
     # 基準価額・純資産総額・分配金のCSVデータ
-    LINK_HISTORICAL_DATA = ("#download", "href")
+    HISTORICAL_DATA_URL = ("#download", "href")
 
     # 分配金
-    DISTRIBUTIONS = (
-        "#dividendInfo",
-        None
-    )
+    DISTRIBUTION = ("#dividendInfo", None)
 
-    def get_distribution_date_locator(self, number: int):
+    # 年間分配金累計
+    DIVIDEND_TOTAL_OF_YEAR = ("#dividend1y > tr > td", None)
+
+    # 協会ファンドコード
+    FUND_CODE = ("#associFundCd", "value")
+
+    @staticmethod
+    def get_distribution_date_locator(number: int) -> tuple:
         if isinstance(number, int):
             i = number + 2
-            return f"#dividendInfo > tr:nth-child({i}) > th"
+            return (f"#dividendInfo > tr:nth-child({i}) > th", None)
 
-    def get_distribution_amount_locator(self, number: int):
+    @staticmethod
+    def get_distribution_amount_locator(number: int) -> tuple:
         if isinstance(number, int):
             i = number + 2
-            return f"#dividendInfo > tr:nth-child({i}) > td"
+            return (f"#dividendInfo > tr:nth-child({i}) > td", None)
 
-    def get_torakuritsu_period_locator(self, number: int) -> str:
+    @staticmethod
+    def get_pct_change_period_locator(number: int) -> tuple:
         if isinstance(number, int):
             i = number + 3
-            return f"#tab_content2 > div > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div > table > tr:nth-child({i}) > th"
+            return (
+                f"#tab_content2 > div > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div > table > tr:nth-child({i}) > th",
+                None)
 
-    def get_torakuritsu_fund_locator(self, number: int) -> str:
+    @staticmethod
+    def get_pct_change_fund_locator(number: int) -> tuple:
         if isinstance(number, int):
             i = number + 3
-            return f"#tab_content2 > div > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div > table > tr:nth-child({i}) > td:nth-child(2) > span"
+            return (
+                f"#tab_content2 > div > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div > table > tr:nth-child({i}) > td:nth-child(2) > span",
+                None)
 
-    def get_torakuritsu_category_locator(self, number: int) -> str:
+    @staticmethod
+    def get_pct_change_category_locator(number: int) -> tuple:
         if isinstance(number, int):
             i = number + 3
-            return f"#tab_content2 > div > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div > table > tr:nth-child({i}) > td:nth-child(3) > span"
+            return (
+                f"#tab_content2 > div > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div > table > tr:nth-child({i}) > td:nth-child(3) > span",
+                None)
 
-    def get_risk_period_locator(self, number: int) -> str:
+    @staticmethod
+    def get_risk_period_locator(number: int) -> tuple:
         if isinstance(number, int):
             i = number + 3
-            return f"#tab_content2 > div > div:nth-child(2) > div:nth-child(1) > div:nth-child(2) > div > table > tr:nth-child({i}) > th"
+            return (
+                f"#tab_content2 > div > div:nth-child(2) > div:nth-child(1) > div:nth-child(2) > div > table > tr:nth-child({i}) > th",
+                None)
 
-    def get_risk_fund_locator(self, number: int) -> str:
+    @staticmethod
+    def get_risk_fund_locator(number: int) -> tuple:
         if isinstance(number, int):
             i = number + 3
-            return f"#tab_content2 > div > div:nth-child(2) > div:nth-child(1) > div:nth-child(2) > div > table > tr:nth-child({i}) > td:nth-child(2) > span"
+            return (
+                f"#tab_content2 > div > div:nth-child(2) > div:nth-child(1) > div:nth-child(2) > div > table > tr:nth-child({i}) > td:nth-child(2) > span",
+                None)
 
-    def get_risk_category_locator(self, number: int) -> str:
+    @staticmethod
+    def get_risk_category_locator(number: int) -> tuple:
         if isinstance(number, int):
             i = number + 3
-            return f"#tab_content2 > div > div:nth-child(2) > div:nth-child(1) > div:nth-child(2) > div > table > tr:nth-child({i}) > td:nth-child(3) > span"
+            return (
+                f"#tab_content2 > div > div:nth-child(2) > div:nth-child(1) > div:nth-child(2) > div > table > tr:nth-child({i}) > td:nth-child(3) > span",
+                None)
 
-    def get_sr_period_locator(self, number: int) -> str:
+    @staticmethod
+    def get_sharpe_ratio_period_locator(number: int) -> tuple:
         if isinstance(number, int):
             i = number + 3
-            return f"#tab_content2 > div > div:nth-child(2) > div:nth-child(1) > div:nth-child(3) > div > table > tr:nth-child({i}) > th"
+            return (
+                f"#tab_content2 > div > div:nth-child(2) > div:nth-child(1) > div:nth-child(3) > div > table > tr:nth-child({i}) > th",
+                None)
 
-    def get_sr_fund_locator(self, number: int) -> str:
+    @staticmethod
+    def get_sharpe_ratio_fund_locator(number: int) -> tuple:
         if isinstance(number, int):
             i = number + 3
-            return f"#tab_content2 > div > div:nth-child(2) > div:nth-child(1)> div:nth-child(3) > div > table > tr:nth-child({i}) > td:nth-child(2) > span"
+            return (
+                f"#tab_content2 > div > div:nth-child(2) > div:nth-child(1)> div:nth-child(3) > div > table > tr:nth-child({i}) > td:nth-child(2) > span",
+                None)
 
-    def get_sr_category_locator(self, number: int) -> str:
+    @staticmethod
+    def get_sharpe_ratio_category_locator(number: int) -> tuple:
         if isinstance(number, int):
             i = number + 3
-            return f"#tab_content2 > div > div:nth-child(2) > div:nth-child(1) > div:nth-child(3) > div > table > tr:nth-child({i}) > td:nth-child(3) > span"
+            return (
+                f"#tab_content2 > div > div:nth-child(2) > div:nth-child(1) > div:nth-child(3) > div > table > tr:nth-child({i}) > td:nth-child(3) > span",
+                None)
