@@ -279,82 +279,76 @@ class Fund:
         return self._sanitize(self._parse_element(*AttributeLocator.FUND_CODE))
 
     @property
-    def pct_change(self) -> list:
+    def pct_change(self) -> dict:
         """
         騰落率を取得する
         :return:
         """
-        pct_change = []
+        period = []
+        fund = []
+        category = []
 
         for i in range(5):
             pct_change_period_locator = AttributeLocator().get_pct_change_period_locator(i)
             pct_change_fund_locator = AttributeLocator().get_pct_change_fund_locator(i)
             pct_change_category_locator = AttributeLocator().get_pct_change_category_locator(i)
 
-            pct_change_period = self._parse_element(*pct_change_period_locator)
-            pct_change_fund = self._parse_element(*pct_change_fund_locator)
-            pct_change_category = self._parse_element(*pct_change_category_locator)
+            period.append(self._sanitize(self._parse_element(*pct_change_period_locator)))
+            fund.append(self._sanitize(self._parse_element(*pct_change_fund_locator)))
+            category.append(self._sanitize(self._parse_element(*pct_change_category_locator)))
 
-            pct_change.append(
-                (
-                    self._sanitize(pct_change_period),
-                    self._sanitize(pct_change_fund),
-                    self._sanitize(pct_change_category)
-                )
-            )
-
-        return pct_change
+        return {
+            "period": period,
+            "fund": fund,
+            "category": category
+        }
 
     @property
-    def risk(self) -> list:
+    def risk(self) -> dict:
         """
         騰落率を取得する
         :return:
         """
-        risk = []
+        period = []
+        fund = []
+        category = []
 
         for i in range(5):
             risk_period_locator = AttributeLocator().get_risk_period_locator(i)
             risk_fund_locator = AttributeLocator().get_risk_fund_locator(i)
             risk_category_locator = AttributeLocator().get_risk_category_locator(i)
 
-            risk_period = self._parse_element(*risk_period_locator)
-            risk_fund = self._parse_element(*risk_fund_locator)
-            risk_category = self._parse_element(*risk_category_locator)
+            period.append(self._sanitize(self._parse_element(*risk_period_locator)))
+            fund.append(self._sanitize(self._parse_element(*risk_fund_locator)))
+            category.append(self._sanitize(self._parse_element(*risk_category_locator)))
 
-            risk.append(
-                (
-                    self._sanitize(risk_period),
-                    self._sanitize(risk_fund),
-                    self._sanitize(risk_category)
-                )
-            )
-
-        return risk
+        return {
+            "period": period,
+            "fund": fund,
+            "category": category
+        }
 
     @property
-    def sharpe_ratio(self) -> list:
+    def sharpe_ratio(self) -> dict:
         """
         騰落率を取得する
         :return:
         """
-        sharpe_ratio = []
+        period = []
+        fund = []
+        category = []
 
         for i in range(5):
             sharpe_ratio_period_locator = AttributeLocator().get_sharpe_ratio_period_locator(i)
             sharpe_ratio_fund_locator = AttributeLocator().get_sharpe_ratio_fund_locator(i)
             sharpe_ratio_category_locator = AttributeLocator().get_sharpe_ratio_category_locator(i)
 
-            sharpe_ratio_period = self._parse_element(*sharpe_ratio_period_locator)
-            sharpe_ratio_fund = self._parse_element(*sharpe_ratio_fund_locator)
-            sharpe_ratio_category = self._parse_element(*sharpe_ratio_category_locator)
+            period.append(self._sanitize(self._parse_element(*sharpe_ratio_period_locator)))
+            fund.append(self._sanitize(self._parse_element(*sharpe_ratio_fund_locator)))
+            category.append(self._sanitize(self._parse_element(*sharpe_ratio_category_locator)))
 
-            sharpe_ratio.append(
-                (
-                    self._sanitize(sharpe_ratio_period),
-                    self._sanitize(sharpe_ratio_fund),
-                    self._sanitize(sharpe_ratio_category)
-                )
-            )
-
-        return sharpe_ratio
+        return {
+            "period": period,
+            "fund": fund,
+            "category": category
+        }
