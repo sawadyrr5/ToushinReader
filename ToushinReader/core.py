@@ -234,33 +234,30 @@ class Fund:
         基準価額・純資産総額・分配金のCSV データダウンロード
         :return:
         """
-        return self._sanitize(self._parse_element(*AttributeLocator.HISTORICAL_DATA_URL))
+
+        return "https://toushin-lib.fwg.ne.jp" + self._sanitize(self._parse_element(*AttributeLocator.HISTORICAL_DATA_URL))
 
     @property
-    def dividend(self) -> list:
+    def dividend(self) -> dict:
         """
         最大直近12ヶ月の分配金を取得する
         :return:
         """
-        dividends = []
+        # dividends = []
+        dividend_date = []
+        dividend_amount = []
 
         for i in range(12):
             dividend_date_locator = AttributeLocator().get_distribution_date_locator(i)
             dividend_amount_locator = AttributeLocator().get_distribution_amount_locator(i)
 
-            dividend_date = self._parse_element(*dividend_date_locator)
-            dividend_amount = self._parse_element(*dividend_amount_locator)
+            dividend_date.append(self._sanitize(self._parse_element(*dividend_date_locator)))
+            dividend_amount.append(self._sanitize(self._parse_element(*dividend_amount_locator)))
 
-            # 決算日と分配金が取得できたら返り値に入れる
-            if dividend_date and dividend_amount:
-                dividends.append(
-                    (
-                        self._sanitize(dividend_date),
-                        self._sanitize(dividend_amount)
-                    )
-                )
-
-        return dividends
+        return {
+            "date": dividend_date,
+            "amount": dividend_amount
+        }
 
     @property
     def dividend_total_of_year(self) -> str:
