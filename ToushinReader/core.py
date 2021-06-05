@@ -3,22 +3,25 @@ from urllib3 import disable_warnings
 from urllib3.exceptions import InsecureRequestWarning
 from requests import Session
 from bs4 import BeautifulSoup
-from ToushinReader.locator import AttributeLocator
+from ToushinReader.locator import AttributeLocator, RankingLocator
 
 disable_warnings(InsecureRequestWarning)
 
 
 class Fund:
-    def __init__(self, isin_code: str):
-        url = f"https://toushin-lib.fwg.ne.jp/FdsWeb/FDST030000?isinCd={isin_code}"
+    """ファンド情報を取得するクラス"""
 
-        self._soup = BeautifulSoup(
+    def __init__(self, isin_code: str):
+        self.isin_code = isin_code
+        url = f"https://toushin-lib.fwg.ne.jp/FdsWeb/FDST030000?isinCd={self.isin_code}"
+
+        self.__soup = BeautifulSoup(
             Session().get(url, verify=False).text, features="html.parser"
         )
 
     def _parse_element(self, css_selector: str, attr: str = None) -> str:
 
-        res = [elem.get(attr) if attr else elem.text for elem in self._soup.select(css_selector)]
+        res = [elem.get(attr) if attr else elem.text for elem in self.__soup.select(css_selector)]
 
         if len(res) > 0:
             return str(res[0])
@@ -235,7 +238,8 @@ class Fund:
         :return:
         """
 
-        return "https://toushin-lib.fwg.ne.jp" + self._sanitize(self._parse_element(*AttributeLocator.HISTORICAL_DATA_URL))
+        return "https://toushin-lib.fwg.ne.jp" + self._sanitize(
+            self._parse_element(*AttributeLocator.HISTORICAL_DATA_URL))
 
     @property
     def dividend(self) -> dict:
@@ -348,4 +352,63 @@ class Fund:
             "period": period,
             "fund": fund,
             "category": category
+        }
+
+
+# TODO: 信託報酬、シャープレシオにも対応する
+# TODO: 商品分類、期間にも対応する
+class Ranking:
+    """ランキング情報を取得するクラス"""
+
+    def __init__(self):
+        url = f"https://toushin-lib.fwg.ne.jp/FdsWeb/FDST999902?r_tab=2&r_fundCategory=&r_moneyInOutPeriodFlg=1"
+
+        self._soup = BeautifulSoup(
+            Session().get(url, verify=False).text, features="html.parser"
+        )
+
+    def _parse_element(self, css_selector: str, attr: str = None) -> str:
+
+        res = [elem.get(attr) if attr else elem.text for elem in self._soup.select(css_selector)]
+
+        if len(res) > 0:
+            return str(res[0])
+
+    @staticmethod
+    def _sanitize(text: str) -> str:
+        if text:
+            res = (
+                text.replace("\n", "")
+                    .strip()
+            )
+
+            return res
+
+    @property
+    def money_in_out(self) -> dict:
+        """順資金流出入額ランキングファンドを取得する
+        :return:
+        """
+        money_in_out_isin = []
+        money_in_out_name = []
+        money_in_out_flow = []
+
+        for i in range(20):
+            money_in_out_isin_locator = RankingLocator.get_money_in_out_isin_locator(i)
+            money_in_out_name_locator = RankingLocator.get_money_in_out_name_locator(i)
+            money_in_out_flow_locator = RankingLocator.get_money_in_out_flow_locator(i)
+
+            REPLACE_STR = "/FdsWeb/FDST030000?isinCd="
+
+            money_in_out_isin.append(
+                self._sanitize(self._parse_element(*money_in_out_isin_locator)).replace(REPLACE_STR, ""))
+            money_in_out_name.append(
+                self._sanitize(self._parse_element(*money_in_out_name_locator)).replace(REPLACE_STR, ""))
+            money_in_out_flow.append(
+                self._sanitize(self._parse_element(*money_in_out_flow_locator)).replace(REPLACE_STR, ""))
+
+        return {
+            "isin_code": money_in_out_isin,
+            "name": money_in_out_name,
+            "flow": money_in_out_flow,
         }

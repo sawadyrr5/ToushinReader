@@ -209,3 +209,32 @@ class AttributeLocator:
             return (
                 f"#tab_content2 > div > div:nth-child(2) > div:nth-child(1) > div:nth-child(3) > div > table > tr:nth-child({i}) > td:nth-child(3) > span",
                 None)
+
+
+class RankingLocator:
+    @staticmethod
+    def get_money_in_out_isin_locator(number: int) -> tuple:
+        if isinstance(number, int):
+            i = number + 1
+            return (
+                f"#tab_content_2 > table > tbody > tr:nth-child({i}) > td.text-left.fds-text-word-break > a",
+                "href"
+            )
+
+    @staticmethod
+    def get_money_in_out_name_locator(number: int) -> tuple:
+        if isinstance(number, int):
+            i = number + 1
+            return (
+                f"#tab_content_2 > table > tbody > tr:nth-child({i}) > td.text-left.fds-text-word-break > a",
+                None
+            )
+
+    @staticmethod
+    def get_money_in_out_flow_locator(number: int) -> tuple:
+        if isinstance(number, int):
+            i = number + 1
+            return (
+                f"#tab_content_2 > table > tbody > tr:nth-child({i}) > td.text-right > span",
+                None
+            )
